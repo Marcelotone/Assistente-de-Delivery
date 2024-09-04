@@ -1,0 +1,41 @@
+{
+  "Comment": "Exemplo de fluxo de delivery",
+  "StartAt": "ReceberPedido",
+  "States": {
+    "ReceberPedido": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGIAO:CONTA:function:ReceberPedido",
+      "Next": "ProcessarPedido"
+    },
+    "ProcessarPedido": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGIAO:CONTA:function:ProcessarPedido",
+      "Next": "ConsultarIA"
+    },
+    "ConsultarIA": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGIAO:CONTA:function:ConsultarBedrock",
+      "End": true
+    }
+  }
+}
+
+import boto3
+
+def lambda_handler(event, context):
+    # Supondo que você tenha configurado o Bedrock anteriormente
+    client = boto3.client('bedrock')
+    
+    # Texto do usuário vindo do evento
+    texto_usuario = event['texto']
+    
+    # Chamada ao Bedrock
+    response = client.generate_response(
+        input_text=texto_usuario,
+        model_name='seu-modelo-de-ia'
+    )
+    
+    return {
+        'statusCode': 200,
+        'body': response['generated_text']
+    }
